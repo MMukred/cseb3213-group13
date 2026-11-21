@@ -14,10 +14,69 @@
 #define SORTING_H
 
 #include "house.h"
+#include <vector>
 
-void sortHouses(House[], int, int, int, int) {
-    // Adam: insertion sort and quick sort here.
-    cout << "sortHouses is not written yet (Adam).\n";
+inline bool shouldComeBefore(const House& a, const House& b, int sortBy, bool ascending) {
+    if (sortBy == 1) { // Sort by rent (duplicate rents are allowed)
+        return ascending ? (a.rent < b.rent) : (a.rent > b.rent);
+    } else if (sortBy == 2) { // Sort by distanceKm
+        return ascending ? (a.distanceKm < b.distanceKm) : (a.distanceKm > b.distanceKm);
+    } else { // Sort by id (unique ID)
+        return ascending ? (a.id < b.id) : (a.id > b.id);
+    }
 }
 
-#endif
+inline void insertionSort(std::vector<House>& houses, int sortBy, bool ascending) {
+    int n = static_cast<int>(houses.size());
+    for (int i = 1; i < n; i++) {
+        House key = houses[i];
+        int j = i - 1;
+
+        while (j >= 0 && shouldComeBefore(key, houses[j], sortBy, ascending)) {
+            houses[j + 1] = houses[j];
+            j--;
+        }
+        houses[j + 1] = key;
+    }
+}
+
+inline void merge(std::vector<House>& houses, int left, int mid, int right, int sortBy, bool ascending) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+
+    std::vector<House> leftArr(n1);
+    std::vector<House> rightArr(n2);
+
+    for (int i = 0; i < n1; i++) leftArr[i] = houses[left + i];
+    for (int j = 0; j < n2; j++) rightArr[j] = houses[mid + 1 + j];
+
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (shouldComeBefore(leftArr[i], rightArr[j], sortBy, ascending) ||
+            (!shouldComeBefore(rightArr[j], leftArr[i], sortBy, ascending))) {
+            houses[k++] = leftArr[i++];
+        } else {
+            houses[k++] = rightArr[j++];
+        }
+    }
+
+    while (i < n1) houses[k++] = leftArr[i++];
+    while (j < n2) houses[k++] = rightArr[j++];
+}
+
+inline void mergeSort(std::vector<House>& houses, int left, int right, int sortBy, bool ascending) {
+    if (left >= right) return; 
+
+    int mid = left + (right - left) / 2;
+    mergeSort(houses, left, mid, sortBy, ascending);
+    mergeSort(houses, mid + 1, right, sortBy, ascending);
+    merge(houses, left, mid, right, sortBy, ascending);
+}
+
+inline void displaySortedHouses(const std::vector<House>& houses) {
+    for (const auto& h : houses) {
+        printHouse(h);
+    }
+}
+
+#endif 
