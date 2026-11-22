@@ -13,14 +13,16 @@
 #include <iostream>
 #include <string>
 
+#include "house.h"
 #include "linkedlist.h"
 #include "sorting.h"
 
 using namespace std;
 
 // field: 1 = address, 2 = landlord name. O(n)
+// Walks from getHead and prints every match (address/landlord can repeat).
 void linearSearch(HouseList &list, string key, int field) {
-    Node *cur = list.getHead();
+    HouseNode *cur = list.getHead();
 
     if (cur == nullptr) {
         cout << "The house list is empty.\n";
@@ -32,24 +34,18 @@ void linearSearch(HouseList &list, string key, int field) {
     }
 
     bool found = false;
-    int count = 0;
+    int position = 0;
 
     while (cur != nullptr) {
-        count++;
+        position++;
         House &h = cur->data;
 
         bool match = (field == 1) ? (h.address == key) : (h.landlordName == key);
 
         if (match) {
             found = true;
-            cout << "Found at position " << count << ":\n";
-            cout << "  ID: " << h.id << "\n";
-            cout << "  Address: " << h.address << "\n";
-            cout << "  Rent: " << h.rent << "\n";
-            cout << "  Rooms: " << h.rooms << "\n";
-            cout << "  Distance: " << h.distanceKm << " km\n";
-            cout << "  Status: " << h.status << "\n";
-            cout << "  Landlord: " << h.landlordName << "\n";
+            cout << "Match at list position " << position << ":\n";
+            printHouse(h);
         }
         cur = cur->next;
     }
@@ -59,23 +55,22 @@ void linearSearch(HouseList &list, string key, int field) {
     }
 }
 
-// Binary search by id on a sorted copy. O(n log n) to sort, O(log n) to search
+// Binary search by id on a sorted copy. O(n log n) to sort, O(log n) to search.
+// The list order is not changed (copy, not the list itself).
 void searchById(HouseList &list, int id) {
-    Node *cur = list.getHead();
+    HouseNode *cur = list.getHead();
 
     if (cur == nullptr) {
         cout << "The house list is empty.\n";
         return;
     }
 
-    // Count the nodes so we can size the array
     int n = 0;
     while (cur != nullptr) {
         n++;
         cur = cur->next;
     }
 
-    // Copy the list into an array so the original list is not changed
     House *arr = new House[n];
     cur = list.getHead();
     for (int i = 0; i < n; i++) {
@@ -95,14 +90,8 @@ void searchById(HouseList &list, int id) {
 
         if (arr[MID].id == id) {
             found = true;
-            cout << "Found at sorted index " << MID << ":\n";
-            cout << "  ID: " << arr[MID].id << "\n";
-            cout << "  Address: " << arr[MID].address << "\n";
-            cout << "  Rent: " << arr[MID].rent << "\n";
-            cout << "  Rooms: " << arr[MID].rooms << "\n";
-            cout << "  Distance: " << arr[MID].distanceKm << " km\n";
-            cout << "  Status: " << arr[MID].status << "\n";
-            cout << "  Landlord: " << arr[MID].landlordName << "\n";
+            cout << "Found at sorted-copy index " << MID << ":\n";
+            printHouse(arr[MID]);
             break;
         }
         else if (arr[MID].id < id) {
